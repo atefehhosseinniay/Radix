@@ -10,22 +10,26 @@ class PDFExtractor:
     if len(self.files) == 0:
       raise Exception("No files in directory")
 
-    # iterator
+    # iterator values
     self.i = 0
-    if type(max_iter) == int:
-      self.max = max_iter if len(self.files) > max_iter else len(self.files)
-    else:
-      self.max = len(self.files)
+    self.current = 0
+    self.max_files = len(self.files)
+    self.max_iter = max_iter if type(max_iter) == int else self.max_files
   
   def __iter__(self):
     return self
   
   def __next__(self) -> str:
-    if self.i < self.max:
-      text = self._get_text_(self.path + self.files[self.i])
-      self.i += 1
-      return text
-    raise StopIteration
+    text = ''
+    while text == '':
+      if self.i < self.max_files and self.current < self.max_iter:
+        text = self._get_text_(self.path + self.files[self.i])
+        self.i += 1
+        if text != '':
+          self.current += 1
+          return text
+      else:
+        raise StopIteration
 
   def get_pdf_list(self) -> List[str]:
     '''
@@ -61,4 +65,6 @@ class PDFExtractor:
       print(f'{path}: {e}')
     except PSEOF as e:
       print(f'{path}: {e}')
+    except:
+      print(f'{path}: An unexpected error occured')
     return ''
