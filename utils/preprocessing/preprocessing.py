@@ -3,6 +3,8 @@ from spacy.matcher import Matcher
 import json
 import re
 
+from utils.preprocessing.utils import longest_num, most_common
+
 nlp = spacy.load('en_core_web_lg')
 matcher = Matcher(nlp.vocab)
 stopwords = nlp.Defaults.stop_words
@@ -12,18 +14,27 @@ with open('./utils/preprocessing/words/skills.csv', 'r') as io:
   skillset = io.read().split(',')
 
 def extract_name(text: str):
-  nlp_text = nlp(text)
-  
-  # First name and Last name are always Proper Nouns
-  pattern = [{'POS': 'PROPN'}, {'POS': 'PROPN'}]
-  
-  matcher.add('NAME', [pattern])
-  
-  matches = matcher(nlp_text)
-  
-  for match_id, start, end in matches:
-      span = nlp_text[start:end]
-      return span.text
+  '''
+  Ideas:
+    Check if name matches with email
+    Use Matcher + NER
+    Just grab first words
+    Try Other NER than Spacy
+  '''
+  doc = nlp(text)
+  result = []
+  for ent in doc.ents:
+    if ent.label_ == 'PERSON':
+      print(ent.label_, ent.text)
+      result.append(ent.text)
+    else:
+      next
+  if len(result) > 0:
+    res = result[0].split('\n')[0]
+    print("*"*10)
+    return res.strip()
+  else:
+    return 'no name'
 
 def extract_email(text: str):
   email = re.findall("([^@|\s]+@[^@]+\.[^@|\s]+)", text)
@@ -34,12 +45,6 @@ def extract_email(text: str):
           return None
 
 def extract_phone_number(text: str):
-  def longest_num(num: str) -> int:
-    i = 0
-    for n in num:
-      if n.isdigit():
-        i += 1
-    return i
   phone_format = re.compile(r'(\+?\d{3}[-\. \t]?\d{3}[-\. \t]?\d{4,6}|\(\+?\d{2,3}\)[-\. \t]?\d{3}[-\. \t]?\d{4,8}|\d{3}[-\. \t]?\d{4}|\+?\d{4}[-\. \t]?\d{3}[-\. \t]?\d{3}|\+?\d{2}[-\. \t]?\d{3,}|\+?\d{4}[-\. \t]?\d{4,})')
   phone = re.findall(phone_format, text)
   if phone:
@@ -52,7 +57,7 @@ def extract_phone_number(text: str):
         return '+' + number
       elif len(number) > 10 and '+' in number:
         return number
-    return max(phone, key=longest_num) # should count len of numbers not raw string (here more spaces win)
+    return max(phone, key=longest_num)
 
 def preprocess(text: str):
   start_len = len(text)
@@ -64,28 +69,14 @@ def preprocess(text: str):
     line = line.split()
     new_line = []
     for word in line:
-      if word.lower() not in stopwords and word.lower() not in banwords:
+      if word.lower() not in banwords:
         new_line.append(word)
     lines[i] = ' '.join(new_line)
   text = '\n'.join(lines)
-  print(text)
+  # print(text)
   
-  # lines = text.split('\n')
-  # skills = []
-  # for i, line in enumerate(lines):
-  #   line = line.split()
-  #   new_line = []
-  #   for word in line:
-  #     # Remove stopwords & ban words
-  #     if word.lower() not in stopwords and word.lower() not in banwords:
-  #       new_line.append(word)
-  #       # If not a ban / stop word, check if skill & ads it into skill list
-  #       if word.lower() in skillset and word.lower() not in skills:
-  #         skills.append(word.lower())
-  #   lines[i] = ' '.join(new_line)
-  # text = '\n'.join(lines)
   print(extract_name(text))
-  print(extract_phone_number(text))
+  # print(extract_phone_number(text))
   print(extract_email(text))
   # print(f'skills:\n{skills}')
 
@@ -94,4 +85,4 @@ def preprocess(text: str):
   # print(text)
   # print(lines)
   end_len = len(text)
-  print(f'Length: {end_len}\nReduced: {start_len - end_len}')
+  # print(f'Length: {end_len}\nReduced: {start_len - end_len}')
