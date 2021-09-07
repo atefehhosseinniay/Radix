@@ -34,7 +34,13 @@ def extract_email(text: str):
           return None
 
 def extract_phone_number(text: str):
-  phone_format =re.compile(r'(\+?\d{3}[-\. \t]??\d{3}[-\. \t]??\d{4}|\(\d{3}\)[-\. \t]??\d{3}[-\. \t]??\d{4}|\d{3}[-\. \t]??\d{4}|\+?\d{4}[-\. \t]??\d{3}[-\. \t]??\d{3}|\+?\d{2}[-\. \t]??\d{3,}|\+?\d{4}[-\. \t]??\d{4,})')
+  def longest_num(num: str) -> int:
+    i = 0
+    for n in num:
+      if n.isdigit():
+        i += 1
+    return i
+  phone_format = re.compile(r'(\+?\d{3}[-\. \t]?\d{3}[-\. \t]?\d{4,6}|\(\+?\d{2,3}\)[-\. \t]?\d{3}[-\. \t]?\d{4,8}|\d{3}[-\. \t]?\d{4}|\+?\d{4}[-\. \t]?\d{3}[-\. \t]?\d{3}|\+?\d{2}[-\. \t]?\d{3,}|\+?\d{4}[-\. \t]?\d{4,})')
   phone = re.findall(phone_format, text)
   if phone:
     for number in phone:
@@ -42,30 +48,46 @@ def extract_phone_number(text: str):
         pass
       if number.startswith('+'):
         return number
-      elif len(number) > 10 and not number.startswith('0'):
+      elif len(number) > 10 and not number.startswith('0') and not '+' in number:
         return '+' + number
-    return max(phone, key=len) # should count len of numbers not raw string (here more spaces win)
+      elif len(number) > 10 and '+' in number:
+        return number
+    return max(phone, key=longest_num) # should count len of numbers not raw string (here more spaces win)
 
 def preprocess(text: str):
   start_len = len(text)
+
+  # Remove stopwords & ban words
   lines = text.split('\n')
-  skills = []
+  cleaned_text = []
   for i, line in enumerate(lines):
     line = line.split()
     new_line = []
     for word in line:
-      # Remove stopwords & ban words
       if word.lower() not in stopwords and word.lower() not in banwords:
         new_line.append(word)
-        # If not a ban / stop word, check if skill & ads it into skill list
-        if word.lower() in skillset and word.lower() not in skills:
-          skills.append(word.lower())
     lines[i] = ' '.join(new_line)
   text = '\n'.join(lines)
+  print(text)
+  
+  # lines = text.split('\n')
+  # skills = []
+  # for i, line in enumerate(lines):
+  #   line = line.split()
+  #   new_line = []
+  #   for word in line:
+  #     # Remove stopwords & ban words
+  #     if word.lower() not in stopwords and word.lower() not in banwords:
+  #       new_line.append(word)
+  #       # If not a ban / stop word, check if skill & ads it into skill list
+  #       if word.lower() in skillset and word.lower() not in skills:
+  #         skills.append(word.lower())
+  #   lines[i] = ' '.join(new_line)
+  # text = '\n'.join(lines)
   print(extract_name(text))
   print(extract_phone_number(text))
   print(extract_email(text))
-  print(f'skills:\n{skills}')
+  # print(f'skills:\n{skills}')
 
   # lines = [line for line in lines if line] #Removes empty lines from text
   # text = ' '.join(lines)
