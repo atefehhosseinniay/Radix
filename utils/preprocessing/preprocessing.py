@@ -45,7 +45,7 @@ def extract_email(text: str):
           return None
 
 def extract_phone_number(text: str):
-  phone_format = re.compile(r'(\+?\d{3}[-\. \t]?\d{3}[-\. \t]?\d{4,6}|\(\+?\d{2,3}\)[-\. \t]?\d{3}[-\. \t]?\d{4,8}|\d{3}[-\. \t]?\d{4}|\+?\d{4}[-\. \t]?\d{3}[-\. \t]?\d{3}|\+?\d{2}[-\. \t]?\d{3,}|\+?\d{4}[-\. \t]?\d{4,})')
+  phone_format = re.compile(r'(\+?\d{3}[-\. \t]?\d{3}[-\. \t]?\d{4,7}|\(\+?\d{2,3}\)[-\. \t]?\d{3}[-\. \t]?\d{4,8}|\d{3}[-\. \t]?\d{4}|\+?\d{4}[-\. \t]?\d{3}[-\. \t]?\d{3}|\+?\d{2}[-\. \t]?\d{3,11}|\+?\d{4}[-\. \t]?\d{4,9})')
   phone = re.findall(phone_format, text)
   if phone:
     for number in phone:
@@ -59,12 +59,12 @@ def extract_phone_number(text: str):
         return number
     return max(phone, key=longest_num)
 
-def preprocess(text: str):
+def preprocess(text: str) -> dict:
+  res = {}
   start_len = len(text)
 
   # Remove stopwords & ban words
   lines = text.split('\n')
-  cleaned_text = []
   for i, line in enumerate(lines):
     line = line.split()
     new_line = []
@@ -75,9 +75,9 @@ def preprocess(text: str):
   text = '\n'.join(lines)
   # print(text)
   
-  print(extract_name(text))
-  # print(extract_phone_number(text))
-  print(extract_email(text))
+  res['name'] = extract_name(text)
+  res['phone'] = extract_phone_number(text)
+  res['email'] = extract_email(text)
   # print(f'skills:\n{skills}')
 
   # lines = [line for line in lines if line] #Removes empty lines from text
@@ -86,3 +86,4 @@ def preprocess(text: str):
   # print(lines)
   end_len = len(text)
   # print(f'Length: {end_len}\nReduced: {start_len - end_len}')
+  return(res)
