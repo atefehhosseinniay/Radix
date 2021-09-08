@@ -1,13 +1,20 @@
-import spacy
-from spacy.matcher import Matcher
+# import spacy
+# from spacy.matcher import Matcher
+from flair.data import Sentence
+from flair.models import SequenceTagger
+from segtok.segmenter import split_single
+
 import json
 import re
 
 from utils.preprocessing.utils import longest_num, most_common
 
-nlp = spacy.load('en_core_web_lg')
-matcher = Matcher(nlp.vocab)
-stopwords = nlp.Defaults.stop_words
+
+tagger = SequenceTagger.load('ner')
+
+# nlp = spacy.load('en_core_web_lg')
+# matcher = Matcher(nlp.vocab)
+# stopwords = nlp.Defaults.stop_words
 with open('./utils/preprocessing/words/bans.json') as io:
   banwords = json.load(io)
 with open('./utils/preprocessing/words/skills.csv', 'r') as io:
@@ -21,20 +28,26 @@ def extract_name(text: str):
     Just grab first words
     Try Other NER than Spacy
   '''
-  doc = nlp(text)
-  result = []
-  for ent in doc.ents:
-    if ent.label_ == 'PERSON':
-      print(ent.label_, ent.text)
-      result.append(ent.text)
-    else:
-      next
-  if len(result) > 0:
-    res = result[0].split('\n')[0]
-    print("*"*10)
-    return res.strip()
-  else:
-    return 'no name'
+  sentences = [Sentence(sent, use_tokenizer=True) for sent in split_single(text)]
+
+  tagger.predict(sentences)
+  for sent in sentences:
+    for entity in sent.get_spans('ner'):
+        print(entity)
+  # doc = nlp(text)
+  # result = []
+  # for ent in doc.ents:
+  #   if ent.label_ == 'PERSON':
+  #     # print(ent.label_, ent.text)
+  #     result.append(ent.text)
+  #   else:
+  #     next
+  # if len(result) > 0:
+  #   res = result[0].split('\n')[0]
+  #   print("*"*10)
+  #   return res.strip()
+  # else:
+  #   return 'no name'
 
 def extract_email(text: str):
   email = re.findall("([^@|\s]+@[^@]+\.[^@|\s]+)", text)
