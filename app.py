@@ -9,5 +9,8 @@ if __name__ == '__main__':
     # pdf contains the extracted text from the pdf file
     # print(pdf)
     # Preprocess every pdf here (preporcessing not done yet)
-    preprocess(pdf)
+    print(pdf.name, preprocess(pdf.text))
     print('-'*50)
+
+# pdf = pdfs.get_pdf_by_name('1.pdf')
+# print(preprocess(pdf))

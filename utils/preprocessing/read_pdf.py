@@ -3,7 +3,18 @@ from pdfminer.high_level import extract_text
 from pdfminer.pdfparser import PDFSyntaxError, PSEOF
 from typing import Union, List
 
+class PDF:
+  """
+    Container class to have pdf name and text in same object
+  """
+  def __init__(self, name: str, text: str):
+    self.name = name
+    self.text = text
+
 class PDFExtractor:
+  """
+    Class handeling pdfs, getting pdf list in folder & iter through them
+  """
   def __init__(self, dir: str, max_iter: Union[int, None] = None):
     self.path: str = dir
     self.files = os.listdir(dir)
@@ -19,7 +30,7 @@ class PDFExtractor:
   def __iter__(self):
     return self
   
-  def __next__(self) -> str:
+  def __next__(self) -> PDF:
     text = ''
     while text == '':
       if self.i < self.max_files and self.current < self.max_iter:
@@ -57,10 +68,11 @@ class PDFExtractor:
     return self._get_text_(self.path + file_name)
   
   @staticmethod
-  def _get_text_(path: str) -> str:
+  def _get_text_(path: str) -> PDF:
     try:
+      name = path.split('/')[-1]
       text = extract_text(path)
-      return text
+      return PDF(name, text)
     except PDFSyntaxError as e:
       print(f'{path}: {e}')
     except PSEOF as e:
