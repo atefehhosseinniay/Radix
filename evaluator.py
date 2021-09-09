@@ -1,3 +1,9 @@
+'''
+TF-IDF 
+https://stackoverflow.com/questions/8897593/how-to-compute-the-similarity-between-two-text-documents
+'''
+
+
 from pyresparser import ResumeParser
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
