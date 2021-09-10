@@ -17,3 +17,10 @@ def most_common(lst: List[str]) -> str:
   :return: Returns a string containing the most common element in list
   '''
   return max(set(lst), key=lst.count)
+
+def search_keyword(text, keyword_list):
+  for word in keyword_list:
+    word = str(word)
+    if word.title() in text or word.upper() in text or word.capitalize() in text:
+      return True
+  return False
