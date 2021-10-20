@@ -7,7 +7,14 @@ The goal of this project is to extract and cluster information from .pdf resume 
 * Atefeh Hossein
 
 ## Tools & Libraries:
-pdfminer, nltk, spacy, resparser, sklearn, flair, difflib, textdistance,scipy, pandas
+- pdfminer
+- nltk
+- spacy
+- resparser
+- Scikit-learn
+- flair
+- scipy
+- pandas
 
  ! Warning !
  if having OS error E053 or packages compatibility,
@@ -25,10 +32,4 @@ git clone git@github.com:atefehhosseinniay/Radix.git
 cd Radix
 git clone git@github.com:arefinnomi/curriculum_vitae_data.git data
 pip install -r requirements.txt
-```
-
-## Usage
-
-```bash
-py app.py
 ```
